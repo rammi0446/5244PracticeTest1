@@ -1,14 +1,21 @@
 package com.example.practicefortest;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
 public class Square {
-    private int  xPosition;
+    private int xPosition;
     private int yPosition;
     private int width;
     private int initialX;
     private int initialY;
+    // image
+
+
+
+
     public int getInitialX() {
         return initialX;
     }
@@ -42,13 +49,14 @@ public class Square {
                this.hitBox.bottom = this.yPosition + this.width;
            }
 
-    public Square(Context context, int x, int y, int width)
+    public Square(Context context, int x, int y, int width, int imageName)
     {
         this.xPosition = x;
         this.yPosition = y;
         this.width = width;
         initialX = x;
         initialY = y;
+
 
         this.hitBox = new Rect(
                 this.xPosition,
