@@ -53,10 +53,12 @@ public class GameEngine extends SurfaceView implements Runnable {
     // ## SPRITES
     // ----------------------------
          Sprite gun;
-        Sprite enemy;
+       // Sprite enemy;
         int Square_width = 10;
         int score = 0;
     ArrayList<Square> bullets = new ArrayList<Square>();
+    ArrayList<Sprite> enemies = new ArrayList<Sprite>();
+
     // ----------------------------
     // ## GAME STATS - number of lives, score, etc
     // ----------------------------
@@ -83,7 +85,10 @@ public class GameEngine extends SurfaceView implements Runnable {
         this.bullets.add(new Square(context, 50, 100, Square_width,R.drawable.shooting));
         this.bullets.add(new Square(context, -50, 100, Square_width,R.drawable.shooting));
         this.bullets.add(new Square(context, -150, 100, Square_width,R.drawable.shooting));
-        this.enemy =  new Sprite(context,screenWidth-500,100,R.drawable.bug1);
+       // this.enemy =  new Sprite(context,screenWidth-500,100,R.drawable.bug1);
+        this.enemies.add(new Sprite(context,screenWidth-500,100,R.drawable.bug1));
+        this.enemies.add(new Sprite(context,screenWidth-500,300,R.drawable.bug1));
+        this.enemies.add(new Sprite(context,screenWidth-500,500,R.drawable.bug1));
 
         // @TODO: Any other game setup stuff goes here
 
@@ -141,8 +146,8 @@ public class GameEngine extends SurfaceView implements Runnable {
     public void updatePositions() {
         // @TODO: Update the position of the sprites
        //Log.d(TAG,"player position: " + this.player.getxPosition() + ", " + this.player.getyPosition());
-        Log.d(TAG,"Enemy position: " + this.enemy.getxPosition() + ", " + this.enemy.getyPosition());
-        //--------------------------enemy moving----------------------------------------
+      //  Log.d(TAG,"Enemy position: " + this.enemy.getxPosition() + ", " + this.enemy.getyPosition());
+        //--------------------------gun moving----------------------------------------
         if(gunMovingDown == true) {
             this.gun.setyPosition(this.gun.getyPosition() + 10);
             if(this.gun.getyPosition() >= this.screenHeight - 200)
@@ -159,7 +164,7 @@ public class GameEngine extends SurfaceView implements Runnable {
             }
 
         }
-        //-------------------------gun moving-------------------------------------------
+        //-------------------------enemy moving-------------------------------------------
 //        if(enemyMovingDown == true) {
 //            this.enemy.setyPosition(this.enemy.getyPosition() + 10);
 //            if(this.enemy.getyPosition() >= this.screenHeight - 200)
@@ -177,7 +182,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 //
 //        }
 
-        // 1. calculate distance between bullet and enemy
+        // 1. move bullets on the screen
 
         for (int i = 0; i < this.bullets.size(); i++) {
             Square bullet = this.bullets.get(i);
@@ -186,28 +191,45 @@ public class GameEngine extends SurfaceView implements Runnable {
                 {
                     bullet.setxPosition(this.gun.getxPosition());
                     bullet.setyPosition(this.gun.getyPosition());
-                    enemy.setxPosition(this.screenWidth);
-                    enemy.setyPosition(this.screenWidth);
                 }
 
            // 4. update the hitbox position for player ....
             bullet.updateHitbox();
 
             // 4. update the hitbox position for enemy
-            this.enemy.updateHitbox();
+           // this.enemy.updateHitbox();
 
             Log.d(TAG, "----------");
 
             // @TODO: Collision detection code
+            for (int it = 0; it < this.enemies.size(); it++) {
+              Sprite  enemy = this.enemies.get(it);
+                Log.d(TAG,"Enemy position: " + enemy.getxPosition() + ", " + enemy.getyPosition());
 
-        if(bullet.getHitBox().intersect(this.enemy.getHitbox()))
-        {
-            this.score = this.score + 1;
-            bullet.setxPosition(this.gun.getxPosition()+200);
-            bullet.setyPosition(this.gun.getyPosition());
-        }
+                if(bullet.getHitBox().intersect(enemy.getHitbox()))
+                {
+                    this.score = this.score + 1;
+                    enemy.setxPosition(this.screenWidth);
+                    enemy.setyPosition(this.screenWidth);
+                    bullet.setxPosition(this.gun.getxPosition()+200);
+                    bullet.setyPosition(this.gun.getyPosition());
+                }
 
-        }//for loop end
+                if (enemy.getxPosition() <= this.screenWidth / 2) {
+                    enemy.setxPosition(this.screenWidth-500);
+                    enemy.setyPosition((i+2)*100);
+                }
+                else
+                {
+                    enemy.setxPosition(enemy.getxPosition() - 10);
+                    enemy.updateHitbox();
+                }
+            }
+
+
+        }//for loop end for bullets
+
+
     }
 
     // 2. Tell Android to DRAW the sprites at their positions-----------------------------
@@ -225,7 +247,25 @@ public class GameEngine extends SurfaceView implements Runnable {
             //draw gun
             canvas.drawBitmap(this.gun.getImage(), this.gun.getxPosition(), this.gun.getyPosition(), paintbrush);
             //draw enemy image
-           canvas.drawBitmap(this.enemy.getImage(), this.enemy.getxPosition(), this.enemy.getyPosition(), paintbrush);
+          // canvas.drawBitmap(this.enemy.getImage(), this.enemy.getxPosition(), this.enemy.getyPosition(), paintbrush);
+            for (int i = 0; i < this.enemies.size(); i++) {
+                // 1. get the (x,y) of the bullet
+                Sprite e = this.enemies.get(i);
+                int x = e.getxPosition();
+                int y = e.getyPosition();
+                // 2. draw the bullet
+                paintbrush.setColor(Color.BLACK);
+                paintbrush.setStyle(Paint.Style.FILL);
+                canvas.drawBitmap(e.getImage(), e.getxPosition(), e.getyPosition(), paintbrush);
+
+                // 3. draw the bullet's hitbox
+                paintbrush.setColor(Color.GREEN);
+                paintbrush.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(
+                        e.getHitbox(),
+                        paintbrush
+                );
+            }
 
             //@TODO: Draw the sprites (rectangle, circle, etc)
             //draw players
@@ -234,7 +274,6 @@ public class GameEngine extends SurfaceView implements Runnable {
                                        Square b = this.bullets.get(i);
                                        int x = b.getxPosition();
                                 int y = b.getyPosition();
-
                                 // 2. draw the bullet
                 paintbrush.setColor(Color.BLACK);
                 paintbrush.setStyle(Paint.Style.FILL);
@@ -248,17 +287,13 @@ public class GameEngine extends SurfaceView implements Runnable {
                                                paintbrush
                                                );
                           }
-
-
             paintbrush.setColor(Color.MAGENTA);
             paintbrush.setStrokeWidth(10);
             paintbrush.setStyle(Paint.Style.STROKE);
-
             //draw hit box for enemy
-            canvas.drawRect(this.enemy.getHitbox(),
-
-                    paintbrush
-            );
+//            canvas.drawRect(this.enemy.getHitbox(),
+//                    paintbrush
+//            );
 
 
             //@TODO: Draw game statistics (lives, score, etc)
