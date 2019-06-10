@@ -53,11 +53,13 @@ public class GameEngine extends SurfaceView implements Runnable {
     // ## SPRITES
     // ----------------------------
          Sprite gun;
+         Sprite bg;
        // Sprite enemy;
         int Square_width = 10;
         int score = 0;
     ArrayList<Square> bullets = new ArrayList<Square>();
     ArrayList<Sprite> enemies = new ArrayList<Sprite>();
+
 
     // ----------------------------
     // ## GAME STATS - number of lives, score, etc
@@ -80,6 +82,8 @@ public class GameEngine extends SurfaceView implements Runnable {
         //  - setup or configure your sprites
         //  - set the initial position of your sprites
        // this.player = new Square(context,100,100, Square_width);
+        this.bg =  new Sprite(context,this.screenWidth,this.screenHeight,R.drawable.bg);
+
         this.gun =  new Sprite(context,150,100,R.drawable.shooting);
         this.bullets.add(new Square(context, 150, 100, Square_width,R.drawable.shooting));
         this.bullets.add(new Square(context, 50, 100, Square_width,R.drawable.shooting));
@@ -89,6 +93,10 @@ public class GameEngine extends SurfaceView implements Runnable {
         this.enemies.add(new Sprite(context,screenWidth-500,100,R.drawable.bug1));
         this.enemies.add(new Sprite(context,screenWidth-500,300,R.drawable.bug1));
         this.enemies.add(new Sprite(context,screenWidth-500,500,R.drawable.bug1));
+        this.enemies.add(new Sprite(context,screenWidth-200,100,R.drawable.bug2));
+        this.enemies.add(new Sprite(context,screenWidth-200,300,R.drawable.bug2));
+        this.enemies.add(new Sprite(context,screenWidth-200,500,R.drawable.bug2));
+
 
         // @TODO: Any other game setup stuff goes here
 
@@ -164,23 +172,7 @@ public class GameEngine extends SurfaceView implements Runnable {
             }
 
         }
-        //-------------------------enemy moving-------------------------------------------
-//        if(enemyMovingDown == true) {
-//            this.enemy.setyPosition(this.enemy.getyPosition() + 10);
-//            if(this.enemy.getyPosition() >= this.screenHeight - 200)
-//            {
-//                enemyMovingDown = false;
-//            }
-//        }
-//        if(enemyMovingDown == false)
-//        {
-//            this.enemy.setyPosition(this.enemy.getyPosition() - 10);
-//            if(this.enemy.getyPosition()<=0)
-//            {
-//                enemyMovingDown = true;
-//            }
-//
-//        }
+
 
         // 1. move bullets on the screen
 
@@ -217,7 +209,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                 if (enemy.getxPosition() <= this.screenWidth / 2) {
                     enemy.setxPosition(this.screenWidth-500);
-                    enemy.setyPosition((i+2)*100);
+                    enemy.setyPosition((i+3)*100);
                 }
                 else
                 {
@@ -243,6 +235,8 @@ public class GameEngine extends SurfaceView implements Runnable {
             // configure the drawing tools
             this.canvas.drawColor(Color.argb(255,255,255,255));
             paintbrush.setColor(Color.GRAY);
+            //draw bg
+            canvas.drawBitmap(this.bg.getImage(), this.bg.getxPosition(), this.bg.getyPosition(), paintbrush);
 
             //draw gun
             canvas.drawBitmap(this.gun.getImage(), this.gun.getxPosition(), this.gun.getyPosition(), paintbrush);
