@@ -10,6 +10,24 @@ public class Sprite {
     private int yPosition;
     private int width;
     private int height;
+    private int InitialX;
+    private int InitialY;
+
+    public int getInitialX() {
+        return InitialX;
+    }
+
+    public void setInitialX(int initialX) {
+        InitialX = initialX;
+    }
+
+    public int getInitialY() {
+        return InitialY;
+    }
+
+    public void setInitialY(int initialY) {
+        InitialY = initialY;
+    }
 
     public int getWidth() {
         return width;
@@ -45,6 +63,8 @@ public class Sprite {
     public Sprite(Context context, int x, int y, int imageName) {
         this.xPosition = x;
         this.yPosition = y;
+        this.InitialX = x;
+        this.InitialY = y;
 
         this.image = BitmapFactory.decodeResource(context.getResources(), imageName);
 

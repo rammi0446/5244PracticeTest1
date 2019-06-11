@@ -95,12 +95,19 @@ public class GameEngine extends SurfaceView implements Runnable {
         this.bullets.add(new Square(context, -50, 100, Square_width,R.drawable.shooting));
         this.bullets.add(new Square(context, -150, 100, Square_width,R.drawable.shooting));
        // this.enemy =  new Sprite(context,screenWidth-500,100,R.drawable.bug1);
-        this.enemies.add(new Sprite(context,screenWidth-500,100,R.drawable.bug1));
-        this.enemies.add(new Sprite(context,screenWidth-500,300,R.drawable.bug1));
-        this.enemies.add(new Sprite(context,screenWidth-500,500,R.drawable.bug1));
-        this.enemies.add(new Sprite(context,screenWidth-200,100,R.drawable.bug2));
-        this.enemies.add(new Sprite(context,screenWidth-200,300,R.drawable.bug2));
-        this.enemies.add(new Sprite(context,screenWidth-200,500,R.drawable.bug2));
+//        this.enemies.add(new Sprite(context,screenWidth-500,50,R.drawable.bug1));
+//        this.enemies.add(new Sprite(context,screenWidth-500,300,R.drawable.bug1));
+//        this.enemies.add(new Sprite(context,screenWidth-500,550,R.drawable.bug1));
+//        this.enemies.add(new Sprite(context,screenWidth,50,R.drawable.bug2));
+//        this.enemies.add(new Sprite(context,screenWidth,300,R.drawable.bug2));
+//        this.enemies.add(new Sprite(context,screenWidth,550,R.drawable.bug2));
+
+        //this.enemies.add(new Sprite(context,screenWidth/2,-550,R.drawable.bug1));
+        this.enemies.add(new Sprite(context,screenWidth/2,-250,R.drawable.bug1));
+        this.enemies.add(new Sprite(context,screenWidth/2,-50,R.drawable.bug1));
+        this.enemies.add(new Sprite(context,screenWidth/2,screenHeight-50,R.drawable.bug2));
+        this.enemies.add(new Sprite(context,screenWidth/2,screenHeight-250,R.drawable.bug2));
+//        this.enemies.add(new Sprite(context,screenWidth,550,R.drawable.bug2));
 
 
         // @TODO: Any other game setup stuff goes here
@@ -174,37 +181,28 @@ public class GameEngine extends SurfaceView implements Runnable {
             for (int it = 0; it < this.enemies.size(); it++) {
               Sprite  enemy = this.enemies.get(it);
                 Log.d(TAG,"Enemy position: " + enemy.getxPosition() + ", " + enemy.getyPosition());
+
+                if(enemy.getxPosition() < this.screenWidth-300) {
+                    enemy.setxPosition(enemy.getxPosition() + 10);
+                    enemy.setyPosition(enemy.getyPosition() + 2);
+                }
+
+
+
+                if(enemy.getxPosition() >= this.screenWidth-200)
+                {
+                    enemy.setxPosition(this.screenWidth-300);
+                    enemy.setyPosition(it*200);
+
+                }
             //---------bullets hit the enemy------------------------------------------------------
                 if(bullet.getHitBox().intersect(enemy.getHitbox()))
                 {
                     this.score = this.score + 1;
-                    enemy.setxPosition(this.screenWidth);
-                    enemy.setyPosition(this.screenWidth);
-                    bullet.setxPosition(this.gun.getxPosition()+300);
-                    bullet.setyPosition(this.gun.getyPosition()+100);
+                    enemy.setxPosition(enemy.getInitialX());
+                    enemy.setyPosition(enemy.getInitialY());
                 }
-               else if(enemy.getHitbox().intersect(gun.getHitbox()))
-                {
-                    this.Lives = this.Lives - 1;
-                    enemy.setxPosition(this.screenWidth);
-                    enemy.setyPosition(this.screenWidth);
-                    bullet.setxPosition(this.gun.getxPosition()+300);
-                    bullet.setyPosition(this.gun.getyPosition()+100);
-                }
-            //----------set the enemy posiiton
-//                if (enemy.getxPosition() <= this.screenWidth / 2) {
-//                    enemy.setxPosition(this.screenWidth-500);
-//                    enemy.setyPosition((i+3)*100);
-//                }
-                if (enemy.getxPosition() <= 0) {
-                    enemy.setxPosition(this.screenWidth-500);
-                   enemy.setyPosition((it+3)*100);
-                }
-                else
-                {
-                    enemy.setxPosition(enemy.getxPosition() - 10);
-                    enemy.updateHitbox();
-                }
+                enemy.updateHitbox();
             }
 
 
