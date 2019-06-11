@@ -8,7 +8,24 @@ import android.graphics.Rect;
 public class Sprite {
     private int xPosition;
     private int yPosition;
+    private int width;
+    private int height;
 
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
 
     // image
     Bitmap image;
