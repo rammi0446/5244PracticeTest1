@@ -182,30 +182,35 @@ public class GameEngine extends SurfaceView implements Runnable {
               Sprite  enemy = this.enemies.get(it);
                 Log.d(TAG,"Enemy position: " + enemy.getxPosition() + ", " + enemy.getyPosition());
 
-                if(enemy.getxPosition() < this.screenWidth-300) {
+                if(enemy.getxPosition() < this.screenWidth-300 || enemy.getyPosition() < 0) {
                     enemy.setxPosition(enemy.getxPosition() + 10);
                     enemy.setyPosition(enemy.getyPosition() + 2);
                 }
-
-
-
-                if(enemy.getxPosition() >= this.screenWidth-200)
+                else
                 {
-                    enemy.setxPosition(this.screenWidth-300);
+                    enemy.setxPosition(enemy.getxPosition() + 10);
+                    enemy.setyPosition(enemy.getyPosition() - 2);
+                }
+                if(enemy.getxPosition() >= this.screenWidth-300)
+                {
+                    enemy.setxPosition(this.screenWidth-200);
                     enemy.setyPosition(it*200);
 
                 }
+
+                enemy.updateHitbox();
             //---------bullets hit the enemy------------------------------------------------------
                 if(bullet.getHitBox().intersect(enemy.getHitbox()))
                 {
+                    Log.d(TAG,"bullet hits the box " );
+
                     this.score = this.score + 1;
                     enemy.setxPosition(enemy.getInitialX());
                     enemy.setyPosition(enemy.getInitialY());
+                    
                 }
-                enemy.updateHitbox();
+
             }
-
-
         }//for loop end for enemies
 
 
