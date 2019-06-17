@@ -61,8 +61,10 @@ public class GameEngine extends SurfaceView implements Runnable {
     int Square_width = 50;
     int score = 0;
     int Lives = 5;
+    boolean GameOver = false;
     ArrayList<Square> bullets = new ArrayList<Square>();
     ArrayList<Sprite> enemies = new ArrayList<Sprite>();
+    ArrayList<Sprite> enemiesTowardPalyer = new ArrayList<Sprite>();
 
 
     // ----------------------------
@@ -90,24 +92,16 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         this.gun = new Sprite(context, 150, 100, R.drawable.shooting);
         this.bullets.add(new Square(context, 150, 100, Square_width, R.drawable.shooting));
-//        this.bullets.add(new Square(context, 50, 100, Square_width,R.drawable.shooting));
-//        this.bullets.add(new Square(context, -50, 100, Square_width,R.drawable.shooting));
-//        this.bullets.add(new Square(context, -150, 100, Square_width,R.drawable.shooting));
-        // this.enemy =  new Sprite(context,screenWidth-500,100,R.drawable.bug1);
-//        this.enemies.add(new Sprite(context,screenWidth-500,50,R.drawable.bug1));
-//        this.enemies.add(new Sprite(context,screenWidth-500,300,R.drawable.bug1));
-//        this.enemies.add(new Sprite(context,screenWidth-500,550,R.drawable.bug1));
-//        this.enemies.add(new Sprite(context,screenWidth,50,R.drawable.bug2));
-//        this.enemies.add(new Sprite(context,screenWidth,300,R.drawable.bug2));
-//        this.enemies.add(new Sprite(context,screenWidth,550,R.drawable.bug2));
 
-        //this.enemies.add(new Sprite(context,screenWidth/2,-550,R.drawable.bug1));
+
+        //enemies initial value
         this.enemies.add(new Sprite(context,screenWidth/2,-250,R.drawable.bug1));
         this.enemies.add(new Sprite(context,screenWidth/2,-50,R.drawable.bug1));
         this.enemies.add(new Sprite(context,screenWidth/2,screenHeight-50,R.drawable.bug2));
         this.enemies.add(new Sprite(context, screenWidth / 2, screenHeight - 250, R.drawable.bug2));
-//        this.enemies.add(new Sprite(context,screenWidth,550,R.drawable.bug2));
-
+//      enemy toward player initial value
+        this.enemiesTowardPalyer.add(new Sprite(context,screenWidth/2,(screenHeight/2)-200,R.drawable.bug1));
+        this.enemiesTowardPalyer.add(new Sprite(context,screenWidth/2,(screenHeight/2)+200,R.drawable.bug2));
 
         // @TODO: Any other game setup stuff goes here
 
@@ -195,8 +189,25 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             enemy.updateHitbox();
 
-        }
+        }//end of 2.
+        //3. move enemies toward player
 
+        for (int it = 0; it < this.enemiesTowardPalyer.size(); it++) {
+            Sprite enemyTowardPlayer = this.enemiesTowardPalyer.get(it);
+            // Log.d(TAG,"Enemy position: " + enemy.getxPosition() + ", " + enemy.getyPosition());
+
+            if (enemyTowardPlayer.getxPosition() > 0 ) {
+                enemyTowardPlayer.setxPosition(enemyTowardPlayer.getxPosition() - 10);
+                enemyTowardPlayer.setyPosition(enemyTowardPlayer.getyPosition() - 2);
+            }
+            else  if(enemyTowardPlayer.getxPosition() < 0) {
+                enemyTowardPlayer.setxPosition(enemyTowardPlayer.getInitialX());
+                enemyTowardPlayer.setyPosition(enemyTowardPlayer.getInitialY());
+
+            }
+
+            enemyTowardPlayer.updateHitbox();
+        }//end of 3.
     }//for loop end for enemies
 
 
@@ -230,6 +241,25 @@ public class GameEngine extends SurfaceView implements Runnable {
             } // end check
 
         } // ends for loop
+
+        //check if enemy hit the player
+        for (int j = 0; j < this.enemiesTowardPalyer.size(); j++) {
+            Sprite e = this.enemiesTowardPalyer.get(j);
+
+            if (gun.getHitbox().intersect(e.getHitbox())) {
+                Log.d(TAG, "enemy hit the player ");
+                this.Lives = this.Lives - 1;
+                e.setxPosition(e.getInitialX());
+                e.setyPosition(e.getInitialY());
+                if(this.Lives == 0)
+                {
+                    //game over
+                    this.GameOver = true;
+
+
+                }
+            }
+        } //
     }
 
 
@@ -258,6 +288,26 @@ public class GameEngine extends SurfaceView implements Runnable {
             for (int i = 0; i < this.enemies.size(); i++) {
                 // 1. get the (x,y) of the bullet
                 Sprite e = this.enemies.get(i);
+                int x = e.getxPosition();
+                int y = e.getyPosition();
+                // 2. draw the bullet
+                paintbrush.setColor(Color.BLACK);
+                paintbrush.setStyle(Paint.Style.FILL);
+                canvas.drawBitmap(e.getImage(), e.getxPosition(), e.getyPosition(), paintbrush);
+
+                // 3. draw the bullet's hitbox
+                paintbrush.setColor(Color.GREEN);
+                paintbrush.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(
+                        e.getHitbox(),
+                        paintbrush
+                );
+            }
+            // draw enemies toward pplayer
+
+            for (int i = 0; i < this.enemiesTowardPalyer.size(); i++) {
+                // 1. get the (x,y) of the bullet
+                Sprite e = this.enemiesTowardPalyer.get(i);
                 int x = e.getxPosition();
                 int y = e.getyPosition();
                 // 2. draw the bullet
@@ -303,7 +353,11 @@ public class GameEngine extends SurfaceView implements Runnable {
             paintbrush.setTextSize(80);
             canvas.drawText("Score :" + score, 20, 100, paintbrush);
             canvas.drawText("Lives :" + Lives, this.screenWidth - 400, 100, paintbrush);
-
+            //Game Over
+            if(GameOver == true)
+            {
+                canvas.drawText("GAME OVER!", this.screenWidth/2, this.screenHeight/2, paintbrush);
+            }
 
             //----------------
             this.holder.unlockCanvasAndPost(canvas);
