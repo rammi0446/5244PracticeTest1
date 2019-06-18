@@ -1,5 +1,6 @@
 package com.example.practicefortest;
 
+import android.content.Intent;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,19 +11,23 @@ import com.example.practicefortest.GameEngine;
 public class MainActivity extends AppCompatActivity {
 
     GameEngine pongGame;
+    Intent i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent myIntent = new Intent(this,GameLose.class);
+        this.i = myIntent;
 
         // Get size of the screen
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
 
+
         // Initialize the GameEngine object
         // Pass it the screen size (height & width)
-        pongGame = new GameEngine(this, size.x, size.y);
+        pongGame = new GameEngine(this, size.x, size.y,i);
 
         // Make GameEngine the view of the Activity
         setContentView(pongGame);

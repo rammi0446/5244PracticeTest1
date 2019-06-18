@@ -1,5 +1,6 @@
 package com.example.practicefortest;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.constraint.solver.widgets.Rectangle;
 import android.util.Log;
@@ -16,7 +18,11 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class GameEngine extends SurfaceView implements Runnable {
 
@@ -61,6 +67,11 @@ public class GameEngine extends SurfaceView implements Runnable {
     int Square_width = 50;
     int score = 0;
     int Lives = 5;
+
+   // Date timer = Calendar.getInstance().getTime();
+    int timer = 60;
+    Context c;
+    Intent myIntent;
     boolean GameOver = false;
     ArrayList<Square> bullets = new ArrayList<Square>();
     ArrayList<Sprite> enemies = new ArrayList<Sprite>();
@@ -72,8 +83,10 @@ public class GameEngine extends SurfaceView implements Runnable {
     // ----------------------------
 
 
-    public GameEngine(Context context, int w, int h) {
+    public GameEngine(Context context, int w, int h, Intent i) {
         super(context);
+        this.myIntent = i;
+        this.c = context;
 
         this.holder = this.getHolder();
         this.paintbrush = new Paint();
@@ -122,6 +135,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     // ------------------------------
     // GAME STATE FUNCTIONS (run, stop, start)
     // ------------------------------
+
     @Override
     public void run() {
         while (gameIsRunning == true) {
@@ -237,6 +251,12 @@ public class GameEngine extends SurfaceView implements Runnable {
                     this.score = this.score + 1;
                     e.setxPosition(e.getInitialX());
                     e.setyPosition(e.getInitialY());
+                    if(this.score >= 20)
+                    {
+                        myIntent.setClass(c,GameLose.class);
+                        myIntent.putExtra("score","You Win");
+                        c.startActivity(myIntent);
+                    }
                 }
             } // end check
 
@@ -245,18 +265,17 @@ public class GameEngine extends SurfaceView implements Runnable {
         //check if enemy hit the player
         for (int j = 0; j < this.enemiesTowardPalyer.size(); j++) {
             Sprite e = this.enemiesTowardPalyer.get(j);
-
             if (gun.getHitbox().intersect(e.getHitbox())) {
                 Log.d(TAG, "enemy hit the player ");
                 this.Lives = this.Lives - 1;
                 e.setxPosition(e.getInitialX());
                 e.setyPosition(e.getInitialY());
-                if(this.Lives == 0)
+                if(this.Lives == 4)
                 {
                     //game over
-                    this.GameOver = true;
-
-
+                    myIntent.setClass(c,GameLose.class);
+                    myIntent.putExtra("lives","You Lose");
+                    c.startActivity(myIntent);
                 }
             }
         } //
@@ -267,6 +286,8 @@ public class GameEngine extends SurfaceView implements Runnable {
     public void redrawSprites() {
         if (this.holder.getSurface().isValid()) {
             this.canvas = this.holder.lockCanvas();
+
+
 
             //----------------
             // Put all your drawing code in this section
@@ -353,11 +374,10 @@ public class GameEngine extends SurfaceView implements Runnable {
             paintbrush.setTextSize(80);
             canvas.drawText("Score :" + score, 20, 100, paintbrush);
             canvas.drawText("Lives :" + Lives, this.screenWidth - 400, 100, paintbrush);
-            //Game Over
-            if(GameOver == true)
-            {
-                canvas.drawText("GAME OVER!", this.screenWidth/2, this.screenHeight/2, paintbrush);
-            }
+          //
+            //  canvas.drawText("Time  :" +timer.getSeconds(), 100, screenHeight-300, paintbrush);
+
+
 
             //----------------
             this.holder.unlockCanvasAndPost(canvas);
@@ -368,6 +388,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     public void setFPS() {
         try {
             gameThread.sleep(50);
+
         } catch (Exception e) {
 
         }
