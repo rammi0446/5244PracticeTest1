@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
@@ -52,6 +54,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     SurfaceHolder holder;
     Canvas canvas;
     Paint paintbrush;
+    Paint pNew;
 
 
     // -----------------------------------
@@ -64,18 +67,24 @@ public class GameEngine extends SurfaceView implements Runnable {
     Sprite gun;
     Sprite bg;
     Square bullet;
+
+
+
     int Square_width = 50;
     int score = 0;
     int Lives = 5;
+    int hitTimes = 3;
+
 
    // Date timer = Calendar.getInstance().getTime();
-    int timer = 60;
+
     Context c;
     Intent myIntent;
     boolean GameOver = false;
     ArrayList<Square> bullets = new ArrayList<Square>();
     ArrayList<Sprite> enemies = new ArrayList<Sprite>();
     ArrayList<Sprite> enemiesTowardPalyer = new ArrayList<Sprite>();
+
 
 
     // ----------------------------
@@ -90,6 +99,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         this.holder = this.getHolder();
         this.paintbrush = new Paint();
+        this.pNew = new Paint();
 
         this.screenWidth = w;
         this.screenHeight = h;
@@ -105,7 +115,6 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         this.gun = new Sprite(context, 150, 100, R.drawable.shooting);
         this.bullets.add(new Square(context, 150, 100, Square_width, R.drawable.shooting));
-
 
         //enemies initial value
         this.enemies.add(new Sprite(context,screenWidth/2,-250,R.drawable.bug1));
@@ -198,14 +207,12 @@ public class GameEngine extends SurfaceView implements Runnable {
             if (enemy.getxPosition() >= this.screenWidth - 300) {
                 enemy.setxPosition(this.screenWidth - 200);
                 enemy.setyPosition(it * 200);
-
             }
 
             enemy.updateHitbox();
 
         }//end of 2.
         //3. move enemies toward player
-
         for (int it = 0; it < this.enemiesTowardPalyer.size(); it++) {
             Sprite enemyTowardPlayer = this.enemiesTowardPalyer.get(it);
             // Log.d(TAG,"Enemy position: " + enemy.getxPosition() + ", " + enemy.getyPosition());
@@ -241,24 +248,23 @@ public class GameEngine extends SurfaceView implements Runnable {
             // Update the bullet hitbox position
             bullet.updateHitbox();
 
+
             // Check if bullet hits enemy
             for (int j = 0; j < this.enemies.size(); j++) {
                 Sprite e = this.enemies.get(j);
+                        if (bullet.getHitBox().intersect(e.getHitbox())) {
+                            Log.d(TAG, "bullet hits the box ");
+                            this.score = this.score + 1;
+                            e.setxPosition(e.getInitialX());
+                            e.setyPosition(e.getInitialY());
+                            if (this.score >= 20) {
+                                myIntent.setClass(c, GameLose.class);
+                                myIntent.putExtra("score", "You Win");
+                                c.startActivity(myIntent);
+                            }
 
-                if (bullet.getHitBox().intersect(e.getHitbox())) {
-                    Log.d(TAG, "bullet hits the box ");
-
-                    this.score = this.score + 1;
-                    e.setxPosition(e.getInitialX());
-                    e.setyPosition(e.getInitialY());
-                    if(this.score >= 20)
-                    {
-                        myIntent.setClass(c,GameLose.class);
-                        myIntent.putExtra("score","You Win");
-                        c.startActivity(myIntent);
-                    }
-                }
-            } // end check
+                } // end
+            }//end of intersect for loop
 
         } // ends for loop
 
@@ -266,11 +272,25 @@ public class GameEngine extends SurfaceView implements Runnable {
         for (int j = 0; j < this.enemiesTowardPalyer.size(); j++) {
             Sprite e = this.enemiesTowardPalyer.get(j);
             if (gun.getHitbox().intersect(e.getHitbox())) {
+                gun.updateHitbox();
                 Log.d(TAG, "enemy hit the player ");
-                this.Lives = this.Lives - 1;
+                this.hitTimes = this.hitTimes - 1;
                 e.setxPosition(e.getInitialX());
                 e.setyPosition(e.getInitialY());
-                if(this.Lives == 4)
+                if(this.hitTimes <= 0)
+                {
+
+                    paintbrush.setPathEffect(new DashPathEffect(new float[]{5, 10, 15, 20}, 0));
+                    this.Lives = this.Lives - 1;
+                }
+               
+
+                if(this.Lives <= 3)
+                {
+                    paintbrush.setColor(Color.TRANSPARENT);
+
+                }
+                if(this.Lives <= 0)
                 {
                     //game over
                     myIntent.setClass(c,GameLose.class);
@@ -279,6 +299,8 @@ public class GameEngine extends SurfaceView implements Runnable {
                 }
             }
         } //
+
+
     }
 
 
@@ -303,6 +325,9 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             //draw gun
             canvas.drawBitmap(this.gun.getImage(), this.gun.getxPosition(), this.gun.getyPosition(), paintbrush);
+            paintbrush.setColor(Color.BLUE);
+            paintbrush.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(this.gun.getHitbox(), paintbrush);
 
             //draw enemy image
             // canvas.drawBitmap(this.enemy.getImage(), this.enemy.getxPosition(), this.enemy.getyPosition(), paintbrush);
@@ -317,12 +342,14 @@ public class GameEngine extends SurfaceView implements Runnable {
                 canvas.drawBitmap(e.getImage(), e.getxPosition(), e.getyPosition(), paintbrush);
 
                 // 3. draw the bullet's hitbox
-                paintbrush.setColor(Color.GREEN);
+                paintbrush.setColor(Color.TRANSPARENT);
                 paintbrush.setStyle(Paint.Style.STROKE);
+
                 canvas.drawRect(
                         e.getHitbox(),
                         paintbrush
                 );
+
             }
             // draw enemies toward pplayer
 
@@ -337,16 +364,17 @@ public class GameEngine extends SurfaceView implements Runnable {
                 canvas.drawBitmap(e.getImage(), e.getxPosition(), e.getyPosition(), paintbrush);
 
                 // 3. draw the bullet's hitbox
-                paintbrush.setColor(Color.GREEN);
+                paintbrush.setColor(Color.TRANSPARENT);
                 paintbrush.setStyle(Paint.Style.STROKE);
                 canvas.drawRect(
                         e.getHitbox(),
                         paintbrush
                 );
+
             }
 
             //@TODO: Draw the sprites (rectangle, circle, etc)
-            //draw players
+            //draw bullets
             for (int i = 0; i < this.bullets.size(); i++) {
                 // 1. get the (x,y) of the bullet
                 Square b = this.bullets.get(i);
@@ -366,14 +394,15 @@ public class GameEngine extends SurfaceView implements Runnable {
                         paintbrush
                 );
             }
-            paintbrush.setColor(Color.MAGENTA);
-            paintbrush.setStrokeWidth(10);
-            paintbrush.setStyle(Paint.Style.STROKE);
+            pNew.setColor(Color.MAGENTA);
+            pNew.setStrokeWidth(10);
+            pNew.setStyle(Paint.Style.STROKE);
 
             //@TODO: Draw game statistics (lives, score, etc)
-            paintbrush.setTextSize(80);
-            canvas.drawText("Score :" + score, 20, 100, paintbrush);
-            canvas.drawText("Lives :" + Lives, this.screenWidth - 400, 100, paintbrush);
+            pNew.setTextSize(100);
+
+            canvas.drawText("Score :" + score, 20, 100, pNew);
+            canvas.drawText("Lives :" + Lives, this.screenWidth - 600, 100, pNew);
           //
             //  canvas.drawText("Time  :" +timer.getSeconds(), 100, screenHeight-300, paintbrush);
 

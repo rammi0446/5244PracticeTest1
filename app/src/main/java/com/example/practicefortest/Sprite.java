@@ -13,6 +13,11 @@ public class Sprite {
     private int InitialX;
     private int InitialY;
 
+
+
+
+
+
     public int getInitialX() {
         return InitialX;
     }
@@ -53,6 +58,8 @@ public class Sprite {
     Rect hitbox;
 
 
+
+
     // vector variables
     double xn = 0;
     double yn = 0;
@@ -73,8 +80,8 @@ public class Sprite {
                 this.yPosition,
                 this.xPosition + this.image.getWidth(),
                 this.yPosition + this.image.getHeight()
-        );
 
+        );
     }
 
     // ---------------------------------
@@ -116,6 +123,9 @@ public class Sprite {
         this.hitbox.right = this.xPosition + this.image.getWidth();
         this.hitbox.bottom = this.yPosition + this.image.getHeight();
     }
+
+
+
 
     // ---------------------------------
     // gets or sets the (x,y) position of the sprite
