@@ -67,6 +67,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     Sprite gun;
     Sprite bg;
     Square bullet;
+    Sprite timeBomb;
 
 
 
@@ -115,6 +116,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         this.gun = new Sprite(context, 150, 100, R.drawable.shooting);
         this.bullets.add(new Square(context, 150, 100, Square_width, R.drawable.shooting));
+        this.timeBomb = new Sprite(context, screenWidth/2, screenHeight/2, R.drawable.shooting);
 
         //enemies initial value
         this.enemies.add(new Sprite(context,screenWidth/2,-250,R.drawable.bug1));
@@ -232,6 +234,14 @@ public class GameEngine extends SurfaceView implements Runnable {
     }//for loop end for enemies
 
 
+
+    //timeBomb()
+   public void  timeBomb()
+    {
+        Log.d(TAG,"in time bomb fun ");
+        canvas.drawBitmap(this.timeBomb.getImage(), this.timeBomb.getxPosition(), this.timeBomb.getyPosition(), paintbrush);
+    }
+
     /* This function handles bullet movement & collision detection */
     public void bulletsMoveFun() {
 
@@ -283,7 +293,7 @@ public class GameEngine extends SurfaceView implements Runnable {
                     paintbrush.setPathEffect(new DashPathEffect(new float[]{5, 10, 15, 20}, 0));
                     this.Lives = this.Lives - 1;
                 }
-               
+
 
                 if(this.Lives <= 3)
                 {
@@ -414,10 +424,16 @@ public class GameEngine extends SurfaceView implements Runnable {
     }
 
     // Sets the frame rate of the game----------------
+    int timePass = 1;
     public void setFPS() {
         try {
             gameThread.sleep(50);
-
+           timePass = timePass + 1;
+           if(timePass == 100)
+           {
+               timeBomb();
+           }
+        Log.d(TAG,"time pass" +timePass);
         } catch (Exception e) {
 
         }
@@ -435,6 +451,27 @@ public class GameEngine extends SurfaceView implements Runnable {
             // user pushed down on screen
             this.gun.setyPosition((int) event.getY());
             gun.updateHitbox();
+
+            if(timeBomb.getxPosition() == event.getX() && timeBomb.getyPosition() == event.getY())
+            {
+                //shoot all the enemies
+                for (int j = 0; j < this.enemies.size(); j++) {
+                    Sprite e = this.enemies.get(j);
+
+                        Log.d(TAG, "Time bomb hits all enemies ");
+                        this.score = this.score + 4;
+                        e.setxPosition(e.getInitialX());
+                        e.setyPosition(e.getInitialY());
+                        if (this.score >= 20) {
+                            myIntent.setClass(c, GameLose.class);
+                            myIntent.putExtra("score", "You Win");
+                            c.startActivity(myIntent);
+                        }
+
+                    } // end
+                }//end
+
+
         } else if (userAction == MotionEvent.ACTION_UP) {
             // user lifted their finger
 
