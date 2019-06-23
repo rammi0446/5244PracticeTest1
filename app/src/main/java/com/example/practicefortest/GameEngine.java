@@ -234,14 +234,6 @@ public class GameEngine extends SurfaceView implements Runnable {
     }//for loop end for enemies
 
 
-
-    //timeBomb()
-   public void  timeBomb()
-    {
-        Log.d(TAG,"in time bomb fun ");
-        canvas.drawBitmap(this.timeBomb.getImage(), this.timeBomb.getxPosition(), this.timeBomb.getyPosition(), paintbrush);
-    }
-
     /* This function handles bullet movement & collision detection */
     public void bulletsMoveFun() {
 
@@ -258,11 +250,28 @@ public class GameEngine extends SurfaceView implements Runnable {
             // Update the bullet hitbox position
             bullet.updateHitbox();
 
+            //check if hits the timebomb-------TIMEBOMB
+            if(bullet.getHitBox().intersect(timeBomb.getHitbox()))
+            {
+                for (int j = 0; j < this.enemies.size(); j++) {
+                    Sprite e = this.enemies.get(j);
+                    e.setxPosition(e.getInitialX());
+                    e.setyPosition(e.getInitialY());
+                }
+                this.score = score + 4;
+                timeBomb.setxPosition(0);
+                timeBomb.setyPosition(screenHeight-100);
+                timeBomb.updateHitbox();
+                timePass = 0;
 
-            // Check if bullet hits enemy
+
+            }
+
+            // Check if bullet hits enemy--------HITS ENEMY
             for (int j = 0; j < this.enemies.size(); j++) {
                 Sprite e = this.enemies.get(j);
-                        if (bullet.getHitBox().intersect(e.getHitbox())) {
+
+                      if (bullet.getHitBox().intersect(e.getHitbox())) {
                             Log.d(TAG, "bullet hits the box ");
                             this.score = this.score + 1;
                             e.setxPosition(e.getInitialX());
@@ -278,7 +287,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         } // ends for loop
 
-        //check if enemy hit the player
+        //check if enemy hit the player--------HITS PLAYER
         for (int j = 0; j < this.enemiesTowardPalyer.size(); j++) {
             Sprite e = this.enemiesTowardPalyer.get(j);
             if (gun.getHitbox().intersect(e.getHitbox())) {
@@ -416,7 +425,14 @@ public class GameEngine extends SurfaceView implements Runnable {
           //
             //  canvas.drawText("Time  :" +timer.getSeconds(), 100, screenHeight-300, paintbrush);
 
-
+            //draw  bomb
+            if(timePass >= 100) {
+                canvas.drawBitmap(this.timeBomb.getImage(), this.timeBomb.getInitialX(), this.timeBomb.getInitialY(), paintbrush);
+                canvas.drawRect(
+                        timeBomb.getHitbox(),
+                        paintbrush
+                );
+            }
 
             //----------------
             this.holder.unlockCanvasAndPost(canvas);
@@ -429,10 +445,6 @@ public class GameEngine extends SurfaceView implements Runnable {
         try {
             gameThread.sleep(50);
            timePass = timePass + 1;
-           if(timePass == 100)
-           {
-               timeBomb();
-           }
         Log.d(TAG,"time pass" +timePass);
         } catch (Exception e) {
 
@@ -451,26 +463,6 @@ public class GameEngine extends SurfaceView implements Runnable {
             // user pushed down on screen
             this.gun.setyPosition((int) event.getY());
             gun.updateHitbox();
-
-            if(timeBomb.getxPosition() == event.getX() && timeBomb.getyPosition() == event.getY())
-            {
-                //shoot all the enemies
-                for (int j = 0; j < this.enemies.size(); j++) {
-                    Sprite e = this.enemies.get(j);
-
-                        Log.d(TAG, "Time bomb hits all enemies ");
-                        this.score = this.score + 4;
-                        e.setxPosition(e.getInitialX());
-                        e.setyPosition(e.getInitialY());
-                        if (this.score >= 20) {
-                            myIntent.setClass(c, GameLose.class);
-                            myIntent.putExtra("score", "You Win");
-                            c.startActivity(myIntent);
-                        }
-
-                    } // end
-                }//end
-
 
         } else if (userAction == MotionEvent.ACTION_UP) {
             // user lifted their finger
